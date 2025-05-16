@@ -8,37 +8,33 @@
 		color: string;
 	};
 
-	let array: ArrayItem[] = $state([]);
-	let isSorting = $state(false);
-	let delay = 50;
+	let array_bubble_sort: ArrayItem[] = $state([]);
+	let array_merge_sort: ArrayItem[] = $state([]);
+	let array_quick_sort: ArrayItem[] = $state([]);
+
+	let delay = 10;
+	let size = 80;
 
 	// Generate random array
 	function generateArray() {
-		array = [];
-		for (let i = 0; i < 80; i++) {
+		let array = [];
+		for (let i = 0; i < size; i++) {
 			array.push({
 				value: Math.floor(Math.random() * 100) + 1,
 				color: ''
 			});
 		}
+		array_bubble_sort = [...array];
+		array_merge_sort = [...array];
+		array_quick_sort = [...array];
 	}
 
 	// Bubble sort algorithm
-	async function bubbleSort() {
-		isSorting = true;
+	async function bubbleSort(array: ArrayItem[]) {
 		let n = array.length;
 
-		// Add a check to stop sorting if cancelled
-		if (!isSorting) return;
-
 		for (let i = 0; i < n - 1; i++) {
-			// Add a check to stop sorting if cancelled
-			if (!isSorting) return;
-
 			for (let j = 0; j < n - i - 1; j++) {
-				// Add a check to stop sorting if cancelled
-				if (!isSorting) return;
-
 				// Highlight current elements
 				array[j].color = 'orange';
 				array[j + 1].color = 'orange';
@@ -59,14 +55,88 @@
 				await tick();
 			}
 		}
-		isSorting = false;
+
+		for (let i = 0; i < array.length; i++) {
+			array[i].color = 'green'; // Highlight sorted elements
+			await tick();
+		}
 	}
 
+// Quick sort algorithm
+async function quickSort(array: ArrayItem[]) {
+	await sort(array, 0, array.length - 1);
+
+	for (let i = 0; i < array.length; i++) {
+		array[i].color = 'green'; // Highlight sorted elements
+		await tick();
+	}
+}
+
+async function sort(arr: ArrayItem[], left: number, right: number): Promise<void> {
+	if (left >= right) return;
+
+	// Choose pivot (middle element)
+	const pivotIndex = Math.floor((left + right) / 2);
+	const pivotValue = arr[pivotIndex].value;
+
+	// Highlight pivot
+	arr[pivotIndex].color = 'green';
+	await tick();
+	await sleep(delay);
+
+	// Partition array
+	let i = left, j = right;
+	while (i <= j) {
+		// Move left pointer
+		while (i <= j && arr[i].value < pivotValue) {
+			i++;
+			await tick();
+			await sleep(delay);
+		}
+
+		// Move right pointer
+		while (i <= j && arr[j].value > pivotValue) {
+			j--;
+			await tick();
+			await sleep(delay);
+		}
+
+		// Swap elements
+		if (i <= j) {
+			// Highlight elements to swap
+			arr[i].color = 'orange';
+			arr[j].color = 'orange';
+			await tick();
+			await sleep(delay);
+
+			// Swap
+			[arr[i], arr[j]] = [arr[j], arr[i]];
+			await tick();
+			await sleep(delay);
+
+			// Reset colors
+			arr[i].color = '';
+			arr[j].color = '';
+			await tick();
+			await sleep(delay);
+
+			i++;
+			j--;
+		}
+	}
+
+	// Recursively sort left and right partitions
+	await sort(arr, left, j);
+	await sort(arr, i, right);
+}
 	// Merge sort algorithm
-	async function mergeSort() {
-		isSorting = true;
+	async function mergeSort(array: ArrayItem[]) {
 		await merge(array, 0, array.length - 1);
-		isSorting = false;
+
+		for (let i = 0; i < array.length; i++) {
+			array[i].color = 'green'; // Highlight sorted elements
+			await tick();
+		}
 	}
 
 	async function merge(arr: ArrayItem[], left: number, right: number): Promise<void> {
@@ -146,12 +216,31 @@
 </script>
 
 <main>
-	<h1>Bubble Sort Visualization</h1>
-	<button onclick={generateArray}>Generate New Array</button>
-	<button onclick={bubbleSort} disabled={isSorting}>Start Bubble Sort</button>
-	<button onclick={mergeSort} disabled={isSorting}>Start Merge Sort</button>
+	<button onclick={() => {
+		generateArray();
+		bubbleSort(array_bubble_sort);
+		mergeSort(array_merge_sort);
+		quickSort(array_quick_sort);
+	}}>Start Sort</button>
+	<h1>Bubble Sort</h1>
 	<div style="display: flex; gap: 5px; margin-top: 20px;">
-		{#each array as item, index}
+		{#each array_bubble_sort as item, index}
+			<div
+				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
+			></div>
+		{/each}
+	</div>
+	<h1>Merge Sort</h1>
+	<div style="display: flex; gap: 5px; margin-top: 20px;">
+		{#each array_merge_sort as item, index}
+			<div
+				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
+			></div>
+		{/each}
+	</div>
+	<h1>Quick Sort</h1>
+	<div style="display: flex; gap: 5px; margin-top: 20px;">
+		{#each array_quick_sort as item, index}
 			<div
 				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
 			></div>
