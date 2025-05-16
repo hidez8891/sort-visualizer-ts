@@ -12,8 +12,8 @@
 	let array_merge_sort: ArrayItem[] = $state([]);
 	let array_quick_sort: ArrayItem[] = $state([]);
 
-	let delay = 10;
-	let size = 80;
+	let delay = $state(10);
+	let size = $state(80);
 
 	// Generate random array
 	function generateArray() {
@@ -216,6 +216,14 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 </script>
 
 <main>
+	<div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+		<label for="delay">Delay (ms): {delay}</label>
+		<input type="range" id="delay" bind:value={delay} min="1" max="100" step="1">
+
+		<label for="size">Size: {size}</label>
+		<input type="range" id="size" bind:value={size} min="10" max="100" step="1">
+	</div>
+
 	<button onclick={() => {
 		generateArray();
 		bubbleSort(array_bubble_sort);
