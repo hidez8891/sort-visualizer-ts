@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 
- 	const sleep = (time: number) => new Promise(resolve => setTimeout(resolve, time))
+ 	const sleep = (time: number) => new Promise(resolve => {
+		if (time < 0) {
+			resolve(0);
+			return;
+		}
+		setTimeout(resolve, time);
+	});
 
 	type ArrayItem = {
 		value: number;
@@ -218,7 +224,7 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 <main>
 	<div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
 		<label for="delay">Delay (ms): {delay}</label>
-		<input type="range" id="delay" bind:value={delay} min="1" max="100" step="1">
+		<input type="range" id="delay" bind:value={delay} min="0" max="100" step="1">
 
 		<label for="size">Size: {size}</label>
 		<input type="range" id="size" bind:value={size} min="10" max="100" step="1">
