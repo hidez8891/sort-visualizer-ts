@@ -2,10 +2,6 @@
 	import { onMount, tick } from 'svelte';
 
  	const sleep = (time: number) => new Promise(resolve => {
-		if (time < 0) {
-			resolve(0);
-			return;
-		}
 		setTimeout(resolve, time);
 	});
 
@@ -20,6 +16,7 @@
 
 	let delay = $state(10);
 	let size = $state(80);
+	let width = $state(0);
 
 	// Generate random array
 	function generateArray() {
@@ -44,27 +41,23 @@
 				// Highlight current elements
 				array[j].color = 'orange';
 				array[j + 1].color = 'orange';
-				await tick();
 				await sleep(delay)
 
 				// Compare elements
 				if (array[j].value > array[j + 1].value) {
 					// Swap elements
 					[array[j], array[j + 1]] = [array[j + 1], array[j]];
-					await tick();
 					await sleep(delay)
 				}
 
 				// Reset color
 				array[j].color = '';
 				array[j + 1].color = '';
-				await tick();
 			}
 		}
 
 		for (let i = 0; i < array.length; i++) {
 			array[i].color = 'green'; // Highlight sorted elements
-			await tick();
 		}
 	}
 
@@ -74,7 +67,6 @@ async function quickSort(array: ArrayItem[]) {
 
 	for (let i = 0; i < array.length; i++) {
 		array[i].color = 'green'; // Highlight sorted elements
-		await tick();
 	}
 }
 
@@ -87,7 +79,6 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 
 	// Highlight pivot
 	arr[pivotIndex].color = 'green';
-	await tick();
 	await sleep(delay);
 
 	// Partition array
@@ -96,14 +87,12 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 		// Move left pointer
 		while (i <= j && arr[i].value < pivotValue) {
 			i++;
-			await tick();
 			await sleep(delay);
 		}
 
 		// Move right pointer
 		while (i <= j && arr[j].value > pivotValue) {
 			j--;
-			await tick();
 			await sleep(delay);
 		}
 
@@ -112,18 +101,15 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 			// Highlight elements to swap
 			arr[i].color = 'orange';
 			arr[j].color = 'orange';
-			await tick();
 			await sleep(delay);
 
 			// Swap
 			[arr[i], arr[j]] = [arr[j], arr[i]];
-			await tick();
 			await sleep(delay);
 
 			// Reset colors
 			arr[i].color = '';
 			arr[j].color = '';
-			await tick();
 			await sleep(delay);
 
 			i++;
@@ -141,7 +127,6 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 
 		for (let i = 0; i < array.length; i++) {
 			array[i].color = 'green'; // Highlight sorted elements
-			await tick();
 		}
 	}
 
@@ -163,7 +148,6 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 			// Highlight merge boundaries
 			arr[pi].color = 'orange';
 			arr[pj].color = 'orange';
-			await tick();
 			await sleep(delay);
 
 			if (arr[i].value <= arr[j].value) {
@@ -173,48 +157,39 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 				merged.push(arr[j]);
 				j++;
 			}
-			await tick();
 			await sleep(delay);
 
 			// Reset colors
 			arr[pi].color = '';
 			arr[pj].color = '';
-			await tick();
 		}
 
 		// Add remaining elements
 		while (i <= mid) {
 			arr[i].color = 'orange';
-			await tick();
 			await sleep(delay);
 
 			merged.push(arr[i]);
 			i++;
-			await tick();
 			await sleep(delay);
 
 			arr[i-1].color = '';
-			await tick();
 		}
 		while (j <= right) {
 			arr[j].color = 'orange';
-			await tick();
 			await sleep(delay);
 
 			merged.push(arr[j]);
 			j++;
-			await tick();
 			await sleep(delay);
 
 			arr[j-1].color = '';
-			await tick();
 		}
 
 		// Update array with merged results
 		for (let k = 0; k < merged.length; k++) {
 			arr[left + k] = merged[k];
 		}
-		await tick();
 	}
 
 	// Initialize array
@@ -227,7 +202,7 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 		<input type="range" id="delay" bind:value={delay} min="0" max="100" step="1">
 
 		<label for="size">Size: {size}</label>
-		<input type="range" id="size" bind:value={size} min="10" max="100" step="1">
+		<input type="range" id="size" bind:value={size} min="10" max="1000" step="10" onchange={generateArray}>
 	</div>
 
 	<button onclick={() => {
@@ -237,7 +212,7 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 		quickSort(array_quick_sort);
 	}}>Start Sort</button>
 	<h1>Bubble Sort</h1>
-	<div style="display: flex; gap: 5px; margin-top: 20px;">
+	<div style="display: flex; gap: {(width / size) < 15 ? '0px' : '5px'}; margin-top: 20px;" bind:clientWidth={width}>
 		{#each array_bubble_sort as item, index}
 			<div
 				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
@@ -245,7 +220,7 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 		{/each}
 	</div>
 	<h1>Merge Sort</h1>
-	<div style="display: flex; gap: 5px; margin-top: 20px;">
+	<div style="display: flex; gap: {(width / size) < 15 ? '0px' : '5px'}; margin-top: 20px;">
 		{#each array_merge_sort as item, index}
 			<div
 				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
@@ -253,7 +228,7 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 		{/each}
 	</div>
 	<h1>Quick Sort</h1>
-	<div style="display: flex; gap: 5px; margin-top: 20px;">
+	<div style="display: flex; gap: {(width / size) < 15 ? '0px' : '5px'}; margin-top: 20px;">
 		{#each array_quick_sort as item, index}
 			<div
 				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
