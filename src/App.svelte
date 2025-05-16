@@ -1,47 +1,97 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+	import { onMount, tick } from 'svelte';
+
+ 	const sleep = (time: number) => new Promise(resolve => setTimeout(resolve, time))
+
+	type ArrayItem = {
+		value: number;
+		color: string;
+	};
+
+	let array: ArrayItem[] = $state([]);
+	let isSorting = $state(false);
+	let delay = 50;
+
+	// Generate random array
+	function generateArray() {
+		array = [];
+		for (let i = 0; i < 10; i++) {
+			array.push({
+				value: Math.floor(Math.random() * 100) + 1,
+				color: ''
+			});
+		}
+	}
+
+	// Bubble sort algorithm
+	async function bubbleSort() {
+		isSorting = true;
+		let n = array.length;
+
+		// Add a check to stop sorting if cancelled
+		if (!isSorting) return;
+
+		for (let i = 0; i < n - 1; i++) {
+			// Add a check to stop sorting if cancelled
+			if (!isSorting) return;
+
+			for (let j = 0; j < n - i - 1; j++) {
+				// Add a check to stop sorting if cancelled
+				if (!isSorting) return;
+
+				// Highlight current elements
+				array[j].color = 'orange';
+				array[j + 1].color = 'orange';
+				await tick();
+				await sleep(delay)
+
+				// Compare elements
+				if (array[j].value > array[j + 1].value) {
+					// Swap elements
+					[array[j], array[j + 1]] = [array[j + 1], array[j]];
+					await tick();
+					await sleep(delay)
+				}
+
+				// Reset color
+				array[j].color = '';
+				array[j + 1].color = '';
+				await tick();
+			}
+		}
+		isSorting = false;
+	}
+
+	// Initialize array
+	generateArray();
 </script>
 
 <main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+	<h1>Bubble Sort Visualization</h1>
+	<button onclick={generateArray}>Generate New Array</button>
+	<button onclick={bubbleSort} disabled={isSorting}>Start Sorting</button>
+	<div style="display: flex; gap: 10px; margin-top: 20px;">
+		{#each array as item, index}
+			<div
+				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
+			></div>
+		{/each}
+	</div>
 </main>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
+	main {
+		padding: 2em;
+		text-align: center;
+	}
+
+	button {
+		margin: 10px;
+		padding: 10px 20px;
+		font-size: 16px;
+	}
+
+	div[style] {
+		transition: height 0.3s, background-color 0.3s;
+	}
 </style>
