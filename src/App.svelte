@@ -23,6 +23,8 @@
 	let size = $derived(Math.pow(2, expo));
 	let row = $state(1);
 
+	let sorting = $state(false);
+
 	// Generate random array
 	function generateArray() {
 		let array = [];
@@ -63,7 +65,10 @@
 		<input type="range" id="row" bind:value={row} min="1" max="5" step="1">
 	</div>
 
-	<button onclick={async () => {
+	<button disabled={sorting != false} onclick={ async () => {
+		if (sorting) return;
+
+		sorting = true;
 		await Promise.all([
 			insertionSort(array_insertion_sort, redraw),
 			selectionSort(array_selection_sort, redraw),
@@ -73,6 +78,7 @@
 			mergeSort(array_merge_sort, redraw),
 			quickSort(array_quick_sort, redraw),
 		]);
+		sorting = false;
 	}}>Start Sort</button>
 
 	<div id="grid-items" style="grid-template-columns: repeat({row}, 1fr);">
