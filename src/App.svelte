@@ -13,7 +13,8 @@
 	let array_quick_sort: ArrayItem[] = $state([]);
 
 	let delay = $state(10);
-	let size = $state(80);
+	let expo = $state(4);
+	let size = $derived(Math.pow(2, expo));
 	let row = $state(1);
 
 	// Generate random array
@@ -25,6 +26,7 @@
 				color: ''
 			});
 		}
+
 		array_bubble_sort = [...array];
 		array_comb_sort = [...array];
 		array_merge_sort = [...array];
@@ -45,8 +47,8 @@
 		<label for="delay">Delay (ms): {delay}</label>
 		<input type="range" id="delay" bind:value={delay} min="0" max="100" step="1">
 
-		<label for="size">Size: {size}</label>
-		<input type="range" id="size" bind:value={size} min="10" max="1000" step="10" onchange={generateArray}>
+		<label for="expo">Size: {size}</label>
+		<input type="range" id="expo" bind:value={expo} min="4" max="10" step="1" onchange={generateArray}>
 
 		<label for="row">Row: {row}</label>
 		<input type="range" id="row" bind:value={row} min="1" max="4" step="1">
