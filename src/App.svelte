@@ -14,7 +14,7 @@
 
 	let delay = $state(10);
 	let size = $state(80);
-	let width = $state(0);
+	let row = $state(1);
 
 	// Generate random array
 	function generateArray() {
@@ -41,26 +41,30 @@
 </script>
 
 <main>
-	<div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+	<div id="header">
 		<label for="delay">Delay (ms): {delay}</label>
 		<input type="range" id="delay" bind:value={delay} min="0" max="100" step="1">
 
 		<label for="size">Size: {size}</label>
 		<input type="range" id="size" bind:value={size} min="10" max="1000" step="10" onchange={generateArray}>
+
+		<label for="row">Row: {row}</label>
+		<input type="range" id="row" bind:value={row} min="1" max="4" step="1">
 	</div>
 
 	<button onclick={() => {
-		generateArray();
 		bubbleSort(array_bubble_sort, redraw);
 		combSort(array_comb_sort, redraw);
 		mergeSort(array_merge_sort, redraw);
 		quickSort(array_quick_sort, redraw);
 	}}>Start Sort</button>
 
-	<Visualizer name="Bubble Sort" width={width} size={size} array={array_bubble_sort} />
-	<Visualizer name="Comb Sort" width={width} size={size} array={array_comb_sort} />
-	<Visualizer name="Merge Sort" width={width} size={size} array={array_merge_sort} />
-	<Visualizer name="Quick Sort" width={width} size={size} array={array_quick_sort} />
+	<div id="grid-items" style="grid-template-columns: repeat({row}, 1fr);">
+		<Visualizer name="Bubble Sort" size={size} array={array_bubble_sort} />
+		<Visualizer name="Comb Sort" size={size} array={array_comb_sort} />
+		<Visualizer name="Merge Sort" size={size} array={array_merge_sort} />
+		<Visualizer name="Quick Sort" size={size} array={array_quick_sort} />
+	</div>
 </main>
 
 <style>
@@ -75,7 +79,19 @@
 		font-size: 16px;
 	}
 
-	div[style] {
-		transition: height 0.3s, background-color 0.3s;
+	#header {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-bottom: 20px;
+	}
+
+	#grid-items {
+		display: grid;
+		/* grid-template-columns: repeat(auto-fill, 100%); */
+		gap: 20px;
+		margin-top: 20px;
+		margin: 20px 20px;
+		place-content: center;
 	}
 </style>
