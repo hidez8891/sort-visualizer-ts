@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { ArrayItem } from './types';
 
-    let {
+    let { name, size, array }: {
         name: string,
         size: number,
         array: ArrayItem[],
