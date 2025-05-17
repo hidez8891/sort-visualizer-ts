@@ -7,6 +7,7 @@
 	import { bubbleSort } from "./lib/bubble_sort";
 	import { bitonicSort } from "./lib/bitonic_sort";
 	import { combSort } from "./lib/comb_sort";
+	import { heapSort } from "./lib/heap_sort";
 	import { mergeSort } from "./lib/merge_sort";
 	import { quickSort } from "./lib/quick_sort";
 
@@ -15,6 +16,7 @@
 	let array_bubble_sort: ArrayItem[] = $state([]);
 	let array_bitonic_sort: ArrayItem[] = $state([]);
 	let array_comb_sort: ArrayItem[] = $state([]);
+	let array_heap_sort: ArrayItem[] = $state([]);
 	let array_merge_sort: ArrayItem[] = $state([]);
 	let array_quick_sort: ArrayItem[] = $state([]);
 
@@ -40,6 +42,7 @@
 		array_bubble_sort = [...array];
 		array_bitonic_sort = [...array];
 		array_comb_sort = [...array];
+		array_heap_sort = [...array];
 		array_merge_sort = [...array];
 		array_quick_sort = [...array];
 	}
@@ -75,6 +78,7 @@
 			bubbleSort(array_bubble_sort, redraw),
 			bitonicSort(array_bitonic_sort, redraw),
 			combSort(array_comb_sort, redraw),
+			heapSort(array_heap_sort, redraw),
 			mergeSort(array_merge_sort, redraw),
 			quickSort(array_quick_sort, redraw),
 		]);
@@ -87,6 +91,7 @@
 		<Visualizer name="Bubble Sort" size={size} array={array_bubble_sort} />
 		<Visualizer name="Bitonic Sort" size={size} array={array_bitonic_sort} />
 		<Visualizer name="Comb Sort" size={size} array={array_comb_sort} />
+		<Visualizer name="Heap Sort" size={size} array={array_heap_sort} />
 		<Visualizer name="Merge Sort" size={size} array={array_merge_sort} />
 		<Visualizer name="Quick Sort" size={size} array={array_quick_sort} />
 	</div>
