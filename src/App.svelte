@@ -7,6 +7,7 @@
 	import { bubbleSort } from "./lib/bubble_sort";
 	import { bitonicSort } from "./lib/bitonic_sort";
 	import { combSort } from "./lib/comb_sort";
+	import { shellSort } from "./lib/shell_sort";
 	import { heapSort } from "./lib/heap_sort";
 	import { mergeSort } from "./lib/merge_sort";
 	import { quickSort } from "./lib/quick_sort";
@@ -16,6 +17,7 @@
 	let array_bubble_sort: ArrayItem[] = $state([]);
 	let array_bitonic_sort: ArrayItem[] = $state([]);
 	let array_comb_sort: ArrayItem[] = $state([]);
+	let array_shell_sort: ArrayItem[] = $state([]);
 	let array_heap_sort: ArrayItem[] = $state([]);
 	let array_merge_sort: ArrayItem[] = $state([]);
 	let array_quick_sort: ArrayItem[] = $state([]);
@@ -23,7 +25,7 @@
 	let delay = $state(10);
 	let expo = $state(4);
 	let size = $derived(Math.pow(2, expo));
-	let row = $state(1);
+	let row = $state(3);
 
 	let sorting = $state(false);
 
@@ -42,6 +44,7 @@
 		array_bubble_sort = [...array];
 		array_bitonic_sort = [...array];
 		array_comb_sort = [...array];
+		array_shell_sort = [...array];
 		array_heap_sort = [...array];
 		array_merge_sort = [...array];
 		array_quick_sort = [...array];
@@ -59,13 +62,13 @@
 <main>
 	<div id="header">
 		<label for="delay">Delay (ms): {delay}</label>
-		<input type="range" id="delay" bind:value={delay} min="0" max="100" step="1">
+		<input type="range" id="delay" bind:value={delay} min="0" max="500" step="10">
 
 		<label for="expo">Size: {size}</label>
 		<input type="range" id="expo" bind:value={expo} min="4" max="10" step="1" onchange={generateArray}>
 
 		<label for="row">Row: {row}</label>
-		<input type="range" id="row" bind:value={row} min="1" max="5" step="1">
+		<input type="range" id="row" bind:value={row} min="1" max="9" step="1">
 	</div>
 
 	<button disabled={sorting != false} onclick={ async () => {
@@ -78,6 +81,7 @@
 			bubbleSort(array_bubble_sort, redraw),
 			bitonicSort(array_bitonic_sort, redraw),
 			combSort(array_comb_sort, redraw),
+			shellSort(array_shell_sort, redraw),
 			heapSort(array_heap_sort, redraw),
 			mergeSort(array_merge_sort, redraw),
 			quickSort(array_quick_sort, redraw),
@@ -91,6 +95,7 @@
 		<Visualizer name="Bubble Sort" size={size} array={array_bubble_sort} />
 		<Visualizer name="Bitonic Sort" size={size} array={array_bitonic_sort} />
 		<Visualizer name="Comb Sort" size={size} array={array_comb_sort} />
+		<Visualizer name="Shell Sort" size={size} array={array_shell_sort} />
 		<Visualizer name="Heap Sort" size={size} array={array_heap_sort} />
 		<Visualizer name="Merge Sort" size={size} array={array_merge_sort} />
 		<Visualizer name="Quick Sort" size={size} array={array_quick_sort} />
