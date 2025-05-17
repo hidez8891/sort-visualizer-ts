@@ -3,6 +3,7 @@
 
 	import type { ArrayItem } from "./lib/types";
 	import { insertionSort } from "./lib/insertion_sort";
+	import { selectionSort } from "./lib/selection_sort";
 	import { bubbleSort } from "./lib/bubble_sort";
 	import { bitonicSort } from "./lib/bitonic_sort";
 	import { combSort } from "./lib/comb_sort";
@@ -10,6 +11,7 @@
 	import { quickSort } from "./lib/quick_sort";
 
 	let array_insertion_sort: ArrayItem[] = $state([]);
+	let array_selection_sort: ArrayItem[] = $state([]);
 	let array_bubble_sort: ArrayItem[] = $state([]);
 	let array_bitonic_sort: ArrayItem[] = $state([]);
 	let array_comb_sort: ArrayItem[] = $state([]);
@@ -32,6 +34,7 @@
 		}
 
 		array_insertion_sort = [...array];
+		array_selection_sort = [...array];
 		array_bubble_sort = [...array];
 		array_bitonic_sort = [...array];
 		array_comb_sort = [...array];
@@ -60,17 +63,21 @@
 		<input type="range" id="row" bind:value={row} min="1" max="5" step="1">
 	</div>
 
-	<button onclick={() => {
-		insertionSort(array_insertion_sort, redraw);
-		bubbleSort(array_bubble_sort, redraw);
-		bitonicSort(array_bitonic_sort, redraw);
-		combSort(array_comb_sort, redraw);
-		mergeSort(array_merge_sort, redraw);
-		quickSort(array_quick_sort, redraw);
+	<button onclick={async () => {
+		await Promise.all([
+			insertionSort(array_insertion_sort, redraw),
+			selectionSort(array_selection_sort, redraw),
+			bubbleSort(array_bubble_sort, redraw),
+			bitonicSort(array_bitonic_sort, redraw),
+			combSort(array_comb_sort, redraw),
+			mergeSort(array_merge_sort, redraw),
+			quickSort(array_quick_sort, redraw),
+		]);
 	}}>Start Sort</button>
 
 	<div id="grid-items" style="grid-template-columns: repeat({row}, 1fr);">
 		<Visualizer name="Insertion Sort" size={size} array={array_insertion_sort} />
+		<Visualizer name="Selection Sort" size={size} array={array_selection_sort} />
 		<Visualizer name="Bubble Sort" size={size} array={array_bubble_sort} />
 		<Visualizer name="Bitonic Sort" size={size} array={array_bitonic_sort} />
 		<Visualizer name="Comb Sort" size={size} array={array_comb_sort} />
