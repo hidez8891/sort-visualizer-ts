@@ -23,12 +23,12 @@ async function merge(arr: ArrayItem[], left: number, right: number, requireDraw:
 
     // Compare elements
     while (i <= mid && j <= right) {
-        let pi = i, pj = j;
-
         // Highlight merge boundaries
-        arr[pi].color = 'orange';
-        arr[pj].color = 'orange';
+        arr[i].color = 'orange';
+        arr[j].color = 'orange';
         await requireDraw();
+        arr[i].color = '';
+        arr[j].color = '';
 
         if (arr[i].value <= arr[j].value) {
             merged.push(arr[i]);
@@ -37,33 +37,24 @@ async function merge(arr: ArrayItem[], left: number, right: number, requireDraw:
             merged.push(arr[j]);
             j++;
         }
-        await requireDraw();
-
-        // Reset colors
-        arr[pi].color = '';
-        arr[pj].color = '';
     }
 
     // Add remaining elements
     while (i <= mid) {
         arr[i].color = 'orange';
         await requireDraw();
+        arr[i].color = '';
 
         merged.push(arr[i]);
         i++;
-        await requireDraw();
-
-        arr[i - 1].color = '';
     }
     while (j <= right) {
         arr[j].color = 'orange';
         await requireDraw();
+        arr[j].color = '';
 
         merged.push(arr[j]);
         j++;
-        await requireDraw();
-
-        arr[j - 1].color = '';
     }
 
     // Update array with merged results

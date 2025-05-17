@@ -19,21 +19,26 @@ async function sort(arr: ArrayItem[], left: number, right: number, requireDraw: 
 
 	// Highlight pivot
 	arr[pivotIndex].color = 'green';
-    await requireDraw();
 
 	// Partition array
 	let i = left, j = right;
 	while (i <= j) {
 		// Move left pointer
 		while (i <= j && arr[i].value < pivotValue) {
-			i++;
+			arr[i].color = 'orange';
             await requireDraw();
+			arr[i].color = '';
+
+			i++;
 		}
 
 		// Move right pointer
 		while (i <= j && arr[j].value > pivotValue) {
-			j--;
+			arr[j].color = 'orange';
             await requireDraw();
+			arr[j].color = '';
+
+			j--;
 		}
 
 		// Swap elements
@@ -42,20 +47,19 @@ async function sort(arr: ArrayItem[], left: number, right: number, requireDraw: 
 			arr[i].color = 'orange';
 			arr[j].color = 'orange';
             await requireDraw();
+			arr[i].color = '';
+			arr[j].color = '';
 
 			// Swap
 			[arr[i], arr[j]] = [arr[j], arr[i]];
-            await requireDraw();
-
-			// Reset colors
-			arr[i].color = '';
-			arr[j].color = '';
-            await requireDraw();
 
 			i++;
 			j--;
 		}
 	}
+
+	// Highlight OFF pivot
+	arr[pivotIndex].color = '';
 
 	// Recursively sort left and right partitions
 	await sort(arr, left, j, requireDraw);

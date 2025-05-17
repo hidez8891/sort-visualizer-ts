@@ -10,17 +10,13 @@ export async function bubbleSort(array: ArrayItem[], requireDraw: () => Promise<
             array[j].color = 'orange';
             array[j + 1].color = 'orange';
             await requireDraw();
-
-            // Compare elements
-            if (array[j].value > array[j + 1].value) {
-                // Swap elements
-                [array[j], array[j + 1]] = [array[j + 1], array[j]];
-                await requireDraw();
-            }
-
-            // Reset color
             array[j].color = '';
             array[j + 1].color = '';
+
+            // Compare & Swap elements
+            if (array[j].value > array[j + 1].value) {
+                [array[j], array[j + 1]] = [array[j + 1], array[j]];
+            }
         }
     }
 

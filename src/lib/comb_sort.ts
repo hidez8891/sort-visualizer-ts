@@ -15,6 +15,8 @@ export async function combSort(array: ArrayItem[], requireDraw: () => Promise<vo
             array[i].color = 'orange';
             array[i + gap].color = 'orange';
             await requireDraw();
+            array[i].color = '';
+            array[i + gap].color = '';
 
             // Compare elements
             if (array[i].value > array[i + gap].value) {
@@ -22,11 +24,6 @@ export async function combSort(array: ArrayItem[], requireDraw: () => Promise<vo
                 [array[i], array[i + gap]] = [array[i + gap], array[i]];
                 swapped = true;
             }
-            await requireDraw();
-
-            // Reset color
-            array[i].color = '';
-            array[i + gap].color = '';
         }
     }
 
