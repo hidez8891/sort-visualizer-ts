@@ -11,6 +11,7 @@
 	};
 
 	let array_bubble_sort: ArrayItem[] = $state([]);
+	let array_comb_sort: ArrayItem[] = $state([]);
 	let array_merge_sort: ArrayItem[] = $state([]);
 	let array_quick_sort: ArrayItem[] = $state([]);
 
@@ -28,6 +29,7 @@
 			});
 		}
 		array_bubble_sort = [...array];
+		array_comb_sort = [...array];
 		array_merge_sort = [...array];
 		array_quick_sort = [...array];
 	}
@@ -192,6 +194,41 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 		}
 	}
 
+	// Comb sort algorithm
+	async function combSort(array: ArrayItem[]) {
+		let gap = array.length;
+		let swapped = true;
+
+		while (gap > 1 || swapped) {
+			gap = Math.floor(gap / 1.3);
+			if (gap < 1) gap = 1;
+			swapped = false;
+
+			for (let i = 0; i + gap < array.length; i++) {
+				// Highlight current elements
+				array[i].color = 'orange';
+				array[i + gap].color = 'orange';
+				await sleep(delay);
+
+				// Compare elements
+				if (array[i].value > array[i + gap].value) {
+					// Swap elements
+					[array[i], array[i + gap]] = [array[i + gap], array[i]];
+					swapped = true;
+				}
+				await sleep(delay);
+
+				// Reset color
+				array[i].color = '';
+				array[i + gap].color = '';
+			}
+		}
+
+		for (let i = 0; i < array.length; i++) {
+			array[i].color = 'green'; // Highlight sorted elements
+		}
+	}
+
 	// Initialize array
 	generateArray();
 </script>
@@ -208,12 +245,21 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 	<button onclick={() => {
 		generateArray();
 		bubbleSort(array_bubble_sort);
+		combSort(array_comb_sort);
 		mergeSort(array_merge_sort);
 		quickSort(array_quick_sort);
 	}}>Start Sort</button>
 	<h1>Bubble Sort</h1>
 	<div style="display: flex; gap: {(width / size) < 15 ? '0px' : '5px'}; margin-top: 20px;" bind:clientWidth={width}>
 		{#each array_bubble_sort as item, index}
+			<div
+				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
+			></div>
+		{/each}
+	</div>
+	<h1>Comb Sort</h1>
+	<div style="display: flex; gap: {(width / size) < 15 ? '0px' : '5px'}; margin-top: 20px;">
+		{#each array_comb_sort as item, index}
 			<div
 				style="flex: 1; background-color: {item.color || 'steelblue'}; height: {item.value * 3}px; transition: height 0.3s, background-color 0.3s;"
 			></div>
@@ -253,3 +299,4 @@ async function sort(arr: ArrayItem[], left: number, right: number): Promise<void
 		transition: height 0.3s, background-color 0.3s;
 	}
 </style>
+
