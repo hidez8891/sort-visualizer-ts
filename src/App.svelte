@@ -2,12 +2,14 @@
 	import Visualizer from "./lib/visualizer.svelte";
 
 	import type { ArrayItem } from "./lib/types";
+	import { insertionSort } from "./lib/insertion_sort";
 	import { bubbleSort } from "./lib/bubble_sort";
 	import { bitonicSort } from "./lib/bitonic_sort";
 	import { combSort } from "./lib/comb_sort";
 	import { mergeSort } from "./lib/merge_sort";
 	import { quickSort } from "./lib/quick_sort";
 
+	let array_insertion_sort: ArrayItem[] = $state([]);
 	let array_bubble_sort: ArrayItem[] = $state([]);
 	let array_bitonic_sort: ArrayItem[] = $state([]);
 	let array_comb_sort: ArrayItem[] = $state([]);
@@ -29,6 +31,7 @@
 			});
 		}
 
+		array_insertion_sort = [...array];
 		array_bubble_sort = [...array];
 		array_bitonic_sort = [...array];
 		array_comb_sort = [...array];
@@ -58,6 +61,7 @@
 	</div>
 
 	<button onclick={() => {
+		insertionSort(array_insertion_sort, redraw);
 		bubbleSort(array_bubble_sort, redraw);
 		bitonicSort(array_bitonic_sort, redraw);
 		combSort(array_comb_sort, redraw);
@@ -66,6 +70,7 @@
 	}}>Start Sort</button>
 
 	<div id="grid-items" style="grid-template-columns: repeat({row}, 1fr);">
+		<Visualizer name="Insertion Sort" size={size} array={array_insertion_sort} />
 		<Visualizer name="Bubble Sort" size={size} array={array_bubble_sort} />
 		<Visualizer name="Bitonic Sort" size={size} array={array_bitonic_sort} />
 		<Visualizer name="Comb Sort" size={size} array={array_comb_sort} />
@@ -102,3 +107,4 @@
 		place-content: center;
 	}
 </style>
+
