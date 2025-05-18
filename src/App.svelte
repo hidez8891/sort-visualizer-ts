@@ -35,12 +35,11 @@
 
 	let delay = $state(10);
 	let expo = $state(4);
-	let size = $derived(Math.pow(2, expo));
 	let row = $state(3);
 
+	let size = $derived(Math.pow(2, expo));
 	let sorting = $state(false);
 
-	// Generate random array
 	function generateArray() {
 		let array = [];
 		for (let i = 0; i < size; i++) {
@@ -127,6 +126,10 @@
 	{:else}
 		Start Sort
 	{/if}
+	</button>
+
+	<button onclick={ () => generateArray() } disabled={sorting != false}>
+		Generate
 	</button>
 
 	<div id="grid-items" style="grid-template-columns: repeat({row}, 1fr);">
