@@ -1,67 +1,58 @@
-import type { ArrayItem } from './types';
+import {
+	type ArrayItem,
+	type RunningOption,
+	type SortingAlgorithm,
+	AbortSortingError
+} from './types';
 
-// Quick sort algorithm
-export async function quickSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-	await sort(array, 0, array.length - 1, requireDraw);
+export class QuickSort implements SortingAlgorithm {
+	name = 'Quick Sort';
 
-	for (let i = 0; i < array.length; i++) {
-		array[i].color = 'green'; // Highlight sorted elements
-	}
-    await requireDraw();
-}
-
-async function sort(arr: ArrayItem[], left: number, right: number, requireDraw: () => Promise<void>): Promise<void> {
-	if (left >= right) return;
-
-	// Choose pivot (middle element)
-	const pivotIndex = Math.floor((left + right) / 2);
-	const pivotValue = arr[pivotIndex].value;
-
-	// Highlight pivot
-	arr[pivotIndex].color = 'green';
-
-	// Partition array
-	let i = left, j = right;
-	while (i <= j) {
-		// Move left pointer
-		while (i <= j && arr[i].value < pivotValue) {
-			arr[i].color = 'orange';
-            await requireDraw();
-			arr[i].color = '';
-
-			i++;
-		}
-
-		// Move right pointer
-		while (i <= j && arr[j].value > pivotValue) {
-			arr[j].color = 'orange';
-            await requireDraw();
-			arr[j].color = '';
-
-			j--;
-		}
-
-		// Swap elements
-		if (i <= j) {
-			// Highlight elements to swap
-			arr[i].color = 'orange';
-			arr[j].color = 'orange';
-            await requireDraw();
-			arr[i].color = '';
-			arr[j].color = '';
-
-			// Swap
-			[arr[i], arr[j]] = [arr[j], arr[i]];
-
-			i++;
-			j--;
-		}
+	async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+		await this.quickSort(array, 0, array.length - 1, opt);
+		return array;
 	}
 
-	// Highlight OFF pivot
-	arr[pivotIndex].color = '';
+	async quickSort(array: ArrayItem[], left: number, right: number, opt: RunningOption): Promise<void> {
+		const { isRunning, compare, swap } = opt;
 
-	// Recursively sort left and right partitions
-	await sort(arr, left, j, requireDraw);
-	await sort(arr, i, right, requireDraw);
+		if (left >= right)
+			return;
+
+		// Choose pivot (middle element)
+		const pivotIndex = Math.floor((left + right) / 2);
+		const pivotValue = array[pivotIndex];
+
+		// Partition array
+		let i = left, j = right;
+		while (i <= j) {
+			if (!isRunning())
+				throw new AbortSortingError();
+
+			// Move left pointer
+			while (i <= j && await compare(array[i], pivotValue) < 0) {
+				if (!isRunning())
+					throw new AbortSortingError();
+				i++;
+			}
+
+			// Move right pointer
+			while (i <= j && await compare(array[j], pivotValue) > 0) {
+				if (!isRunning())
+					throw new AbortSortingError();
+				j--;
+			}
+
+			// Swap elements
+			if (i <= j) {
+				await swap(array, i, j);
+				i++;
+				j--;
+			}
+		}
+
+		// Recursively sort left and right partitions
+		await this.quickSort(array, left, j, opt);
+		await this.quickSort(array, i, right, opt);
+	}
 }

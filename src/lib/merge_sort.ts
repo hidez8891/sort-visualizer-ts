@@ -1,64 +1,57 @@
-import type { ArrayItem } from './types';
+import {
+    type ArrayItem,
+    type RunningOption,
+    type SortingAlgorithm,
+    AbortSortingError
+} from './types';
 
-// Merge sort algorithm
-export async function mergeSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-    await merge(array, 0, array.length - 1, requireDraw);
+export class MergeSort implements SortingAlgorithm {
+    name = 'Merge Sort';
 
-    for (let i = 0; i < array.length; i++) {
-        array[i].color = 'green'; // Highlight sorted elements
+    async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+        await this.mergeSort(array, 0, array.length - 1, opt);
+        return array;
     }
-    await requireDraw();
-}
 
-async function merge(arr: ArrayItem[], left: number, right: number, requireDraw: () => Promise<void>): Promise<void> {
-    if (left >= right) return;
+    async mergeSort(array: ArrayItem[], left: number, right: number, opt: RunningOption) {
+        const { isRunning, compare, copyWith } = opt;
 
-    const mid = Math.floor((left + right) / 2);
-    await merge(arr, left, mid, requireDraw);
-    await merge(arr, mid + 1, right, requireDraw);
+        if (left >= right)
+            return;
 
-    // Merge the two halves
-    const merged: ArrayItem[] = [];
-    let i = left, j = mid + 1;
+        const mid = Math.floor((left + right) / 2);
+        await this.mergeSort(array, left, mid, opt);
+        await this.mergeSort(array, mid + 1, right, opt);
 
-    // Compare elements
-    while (i <= mid && j <= right) {
-        // Highlight merge boundaries
-        arr[i].color = 'orange';
-        arr[j].color = 'orange';
-        await requireDraw();
-        arr[i].color = '';
-        arr[j].color = '';
+        // Merge the two halves
+        const merged: ArrayItem[] = [];
+        let i = left, j = mid + 1;
 
-        if (arr[i].value <= arr[j].value) {
-            merged.push(arr[i]);
+        // Compare elements
+        while (i <= mid && j <= right) {
+            if (!isRunning())
+                throw new AbortSortingError();
+
+            if (await compare(array[i], array[j]) <= 0) {
+                merged.push(array[i]);
+                i++;
+            } else {
+                merged.push(array[j]);
+                j++;
+            }
+        }
+
+        // Add remaining elements
+        while (i <= mid) {
+            merged.push(array[i]);
             i++;
-        } else {
-            merged.push(arr[j]);
+        }
+        while (j <= right) {
+            merged.push(array[j]);
             j++;
         }
-    }
 
-    // Add remaining elements
-    while (i <= mid) {
-        arr[i].color = 'orange';
-        await requireDraw();
-        arr[i].color = '';
-
-        merged.push(arr[i]);
-        i++;
-    }
-    while (j <= right) {
-        arr[j].color = 'orange';
-        await requireDraw();
-        arr[j].color = '';
-
-        merged.push(arr[j]);
-        j++;
-    }
-
-    // Update array with merged results
-    for (let k = 0; k < merged.length; k++) {
-        arr[left + k] = merged[k];
+        // Update array with merged results
+        await copyWith(array, left, merged, 0, merged.length - 1);
     }
 }

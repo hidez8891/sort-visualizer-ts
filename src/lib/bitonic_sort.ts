@@ -1,39 +1,39 @@
-import type { ArrayItem } from './types';
+import {
+    type ArrayItem,
+    type RunningOption,
+    type SortingAlgorithm,
+    AbortSortingError
+} from './types';
 
-// Bitonic sort algorithm
-export async function bitonicSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-    const logn = Math.log2(array.length);
+export class BitonicSort implements SortingAlgorithm {
+    name = 'Bitonic Sort';
 
-    for (let i=0; i < logn; i++) {
-        for (let j=0; j <= i; j++) {
-            await kernel(array, i, j, requireDraw);
+    async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+        const logn = Math.log2(array.length);
+
+        for (let i = 0; i < logn; i++) {
+            for (let j = 0; j <= i; j++) {
+                await this.kernel(array, i, j, opt);
+            }
         }
+
+        return array;
     }
 
-    // Highlight sorted elements
-    for (let i = 0; i < array.length; i++) {
-        array[i].color = 'green';
-    }
-    await requireDraw();
-}
+    async kernel(array: ArrayItem[], p: number, q: number, opt: RunningOption) {
+        const { isRunning, compare, swap } = opt;
 
-async function kernel(array: ArrayItem[], p: number, q: number, requireDraw: () => Promise<void>) {
-    const d = 1 << (p - q);
-    const n = array.length;
+        const d = 1 << (p - q);
+        const n = array.length;
 
-    for (let i = 0; i < n; i++) {
-        const up = ((i >> p) & 2) == 0;
+        for (let i = 0; i < n; i++) {
+            if (!isRunning())
+                throw new AbortSortingError();
 
-        // Highlight current elements
-        array[i].color = 'orange';
-        array[i | d].color = 'orange';
-        await requireDraw();
-        array[i].color = '';
-        array[i | d].color = '';
-
-        // Compare & Swap elements
-        if ((i & d) == 0 && (array[i].value > array[i | d].value) == up) {
-            [array[i], array[i | d]] = [array[i | d], array[i]];
+            const up = ((i >> p) & 2) == 0;
+            if ((i & d) == 0 && (await compare(array[i], array[i | d]) > 0) === up) {
+                await swap(array, i, i | d);
+            }
         }
     }
 }

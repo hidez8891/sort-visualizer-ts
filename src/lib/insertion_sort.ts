@@ -1,36 +1,34 @@
-import type { ArrayItem } from './types';
+import {
+    type ArrayItem,
+    type RunningOption,
+    type SortingAlgorithm,
+    AbortSortingError
+} from './types';
 
-export async function insertionSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-  const n = array.length;
+export class InsertionSort implements SortingAlgorithm {
+    name = 'Insertion Sort';
 
-  for (let i = 1; i < n; i++) {
-    const arr = [...array];
-    let key = arr[i];
-    let j = i - 1;
+    async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+        const { isRunning, compare, copyWith } = opt;
+        const n = array.length;
 
-    while (j >= 0) {
-      // Highlight current elements
-      array[i].color = 'orange';
-      array[j].color = 'orange';
-      await requireDraw();
-      array[i].color = '';
-      array[j].color = '';
+        for (let i = 1; i < n; i++) {
+            const arr = [...array];
+            let key = i;
+            let j = i - 1;
 
-      // Compare elements
-      if (array[j].value < key.value) {
-        break;
-      }
-      arr[j + 1] = arr[j];
-      j--;
+            while (j >= 0 && await compare(array[j], array[key]) > 0) {
+                if (!isRunning())
+                    throw new AbortSortingError();
+
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = array[key];
+
+            await copyWith(array, 0, arr, 0, i);
+        }
+
+        return array;
     }
-    arr[j + 1] = key;
-
-    for (let k = 0; k <= i; k++) {
-      array[k] = arr[k];
-    }
-  }
-
-  for (let i = 0; i < n; i++) {
-    array[i].color = 'green'; // Highlight sorted elements
-  }
 }

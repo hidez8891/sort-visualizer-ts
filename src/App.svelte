@@ -1,26 +1,37 @@
 <script lang="ts">
 	import Visualizer from "./lib/visualizer.svelte";
 
-	import type { ArrayItem } from "./lib/types";
-	import { insertionSort } from "./lib/insertion_sort";
-	import { selectionSort } from "./lib/selection_sort";
-	import { bubbleSort } from "./lib/bubble_sort";
-	import { bitonicSort } from "./lib/bitonic_sort";
-	import { combSort } from "./lib/comb_sort";
-	import { shellSort } from "./lib/shell_sort";
-	import { heapSort } from "./lib/heap_sort";
-	import { mergeSort } from "./lib/merge_sort";
-	import { quickSort } from "./lib/quick_sort";
+	import {
+		type ArrayItem,
+		type RunningOption,
+		type SortingAlgorithm,
+		AbortSortingError
+	} from './lib/types';
 
-	let array_insertion_sort: ArrayItem[] = $state([]);
-	let array_selection_sort: ArrayItem[] = $state([]);
-	let array_bubble_sort: ArrayItem[] = $state([]);
-	let array_bitonic_sort: ArrayItem[] = $state([]);
-	let array_comb_sort: ArrayItem[] = $state([]);
-	let array_shell_sort: ArrayItem[] = $state([]);
-	let array_heap_sort: ArrayItem[] = $state([]);
-	let array_merge_sort: ArrayItem[] = $state([]);
-	let array_quick_sort: ArrayItem[] = $state([]);
+	import { InsertionSort } from "./lib/insertion_sort";
+	import { SelectionSort } from "./lib/selection_sort";
+	import { BubbleSort } from "./lib/bubble_sort";
+	import { BitonicSort } from "./lib/bitonic_sort";
+	import { CombSort } from "./lib/comb_sort";
+	import { ShellSort } from "./lib/shell_sort";
+	import { HeapSort } from "./lib/heap_sort";
+	import { MergeSort } from "./lib/merge_sort";
+	import { QuickSort } from "./lib/quick_sort";
+
+	let algorithms: Array<{
+		sorter: SortingAlgorithm,
+		array: ArrayItem[],
+	}> = $state([
+		{sorter: new InsertionSort(), array: []},
+		{sorter: new SelectionSort(), array: []},
+		{sorter: new BubbleSort(), array: []},
+		{sorter: new BitonicSort(), array: []},
+		{sorter: new CombSort(), array: []},
+		{sorter: new ShellSort(), array: []},
+		{sorter: new HeapSort(), array: []},
+		{sorter: new MergeSort(), array: []},
+		{sorter: new QuickSort(), array: []},
+	]);
 
 	let delay = $state(10);
 	let expo = $state(4);
@@ -39,20 +50,40 @@
 			});
 		}
 
-		array_insertion_sort = [...array];
-		array_selection_sort = [...array];
-		array_bubble_sort = [...array];
-		array_bitonic_sort = [...array];
-		array_comb_sort = [...array];
-		array_shell_sort = [...array];
-		array_heap_sort = [...array];
-		array_merge_sort = [...array];
-		array_quick_sort = [...array];
+		for (let i = 0; i < algorithms.length; i++) {
+			algorithms[i].array = [...array];
+		}
 	}
 
-	// redraw the component
-	async function redraw() {
+	// compare ArrayItem
+    async function compare(a: ArrayItem, b: ArrayItem): Promise<number> {
+		a.color = "orange";
+		b.color = "orange";
 		await new Promise(resolve => setTimeout(resolve, delay));
+		a.color = "";
+		b.color = "";
+
+		return a.value - b.value;
+	}
+
+	// swap ArrayItem
+    async function swap(array: ArrayItem[], i: number, j: number): Promise<void> {
+		[array[i], array[j]] = [array[j], array[i]]
+	}
+
+	// copy src array to dst array
+    async function copyWith(dst: ArrayItem[], dst_index: number, src: ArrayItem[], start_idx: number, end_idx: number): Promise<number> {
+		for (let i = start_idx; i <= end_idx; i++) {
+			dst[dst_index + i] = src[i];
+		}
+	}
+
+	// finished sorting
+	function finished(array: ArrayItem[]): ArrayItem[] {
+		for (let i = 0; i < array.length; i++) {
+			array[i].color = "green";
+		}
+		return array;
 	}
 
 	// Initialize array
@@ -65,40 +96,43 @@
 		<input type="range" id="delay" bind:value={delay} min="0" max="500" step="10">
 
 		<label for="expo">Size: {size}</label>
-		<input type="range" id="expo" bind:value={expo} min="4" max="10" step="1" onchange={generateArray}>
+		<input type="range" id="expo" bind:value={expo} min="4" max="10" step="1" onchange={generateArray} disabled={sorting != false}>
 
 		<label for="row">Row: {row}</label>
 		<input type="range" id="row" bind:value={row} min="1" max="9" step="1">
 	</div>
 
-	<button disabled={sorting != false} onclick={ async () => {
-		if (sorting) return;
+	<button onclick={ async () => {
+		if (sorting) {
+			sorting = false;
+			return;
+		} else {
+			const opt: RunningOption = {
+				isRunning: () => sorting,
+				compare: compare,
+				swap: swap,
+				copyWith: copyWith,
+			};
 
-		sorting = true;
-		await Promise.all([
-			insertionSort(array_insertion_sort, redraw),
-			selectionSort(array_selection_sort, redraw),
-			bubbleSort(array_bubble_sort, redraw),
-			bitonicSort(array_bitonic_sort, redraw),
-			combSort(array_comb_sort, redraw),
-			shellSort(array_shell_sort, redraw),
-			heapSort(array_heap_sort, redraw),
-			mergeSort(array_merge_sort, redraw),
-			quickSort(array_quick_sort, redraw),
-		]);
-		sorting = false;
-	}}>Start Sort</button>
+			sorting = true;
+			Promise.all(algorithms.map(
+				(algorithm) => algorithm.sorter.sort(algorithm.array, opt).then(finished)
+			)).then(
+				() => sorting = false
+			);
+		}
+	}}>
+	{#if sorting}
+		Stop Sort
+	{:else}
+		Start Sort
+	{/if}
+	</button>
 
 	<div id="grid-items" style="grid-template-columns: repeat({row}, 1fr);">
-		<Visualizer name="Insertion Sort" size={size} array={array_insertion_sort} />
-		<Visualizer name="Selection Sort" size={size} array={array_selection_sort} />
-		<Visualizer name="Bubble Sort" size={size} array={array_bubble_sort} />
-		<Visualizer name="Bitonic Sort" size={size} array={array_bitonic_sort} />
-		<Visualizer name="Comb Sort" size={size} array={array_comb_sort} />
-		<Visualizer name="Shell Sort" size={size} array={array_shell_sort} />
-		<Visualizer name="Heap Sort" size={size} array={array_heap_sort} />
-		<Visualizer name="Merge Sort" size={size} array={array_merge_sort} />
-		<Visualizer name="Quick Sort" size={size} array={array_quick_sort} />
+		{#each algorithms as algorithm}
+			<Visualizer name={algorithm.sorter.name} size={size} array={algorithm.array} />
+		{/each}
 	</div>
 </main>
 
@@ -130,4 +164,3 @@
 		place-content: center;
 	}
 </style>
-

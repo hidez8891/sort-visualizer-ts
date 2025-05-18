@@ -1,34 +1,39 @@
-import type { ArrayItem } from './types';
+import {
+    type ArrayItem,
+    type RunningOption,
+    type SortingAlgorithm,
+    AbortSortingError
+} from './types';
 
-// Comb sort algorithm
-export async function combSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-    let gap = array.length;
-    let swapped = true;
+export class CombSort implements SortingAlgorithm {
+    name = 'Comb Sort';
 
-    while (gap > 1 || swapped) {
-        gap = Math.floor(gap / 1.3);
-        if (gap < 1) gap = 1;
-        swapped = false;
+    async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+        const { isRunning, compare, swap } = opt;
 
-        for (let i = 0; i + gap < array.length; i++) {
-            // Highlight current elements
-            array[i].color = 'orange';
-            array[i + gap].color = 'orange';
-            await requireDraw();
-            array[i].color = '';
-            array[i + gap].color = '';
+        let gap = array.length;
+        let swapped = true;
 
-            // Compare elements
-            if (array[i].value > array[i + gap].value) {
-                // Swap elements
-                [array[i], array[i + gap]] = [array[i + gap], array[i]];
-                swapped = true;
+        while (gap > 1 || swapped) {
+            if (!isRunning())
+                throw new AbortSortingError();
+
+            gap = Math.floor(gap / 1.3);
+            if (gap < 1)
+                gap = 1;
+            swapped = false;
+
+            for (let i = 0; i + gap < array.length; i++) {
+                if (!isRunning())
+                    throw new AbortSortingError();
+
+                if (await compare(array[i], array[i + gap]) > 0) {
+                    await swap(array, i, i + gap);
+                    swapped = true;
+                }
             }
         }
-    }
 
-    for (let i = 0; i < array.length; i++) {
-        array[i].color = 'green'; // Highlight sorted elements
+        return array;
     }
-    await requireDraw();
 }

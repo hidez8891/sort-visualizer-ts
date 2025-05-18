@@ -1,47 +1,46 @@
-import type { ArrayItem } from './types';
+import {
+    type ArrayItem,
+    type RunningOption,
+    type SortingAlgorithm,
+    AbortSortingError
+} from './types';
 
-// Shell sort algorithm
-export async function shellSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-    let n = array.length;
-    let gap = Math.ceil(n / 3);
+export class ShellSort implements SortingAlgorithm {
+    name = "Shell Sort";
 
-    while (gap > 0) {
-        for (let i = gap; i < n; i++) {
-            let ary = [...array];
-            let temp = ary[i];
+    async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+        const { isRunning, compare, copyWith } = opt;
 
-            // Compare and shift elements
-            let j = i;
-            while (j >= gap) {
-                // Highlight current elements
-                array[i].color = 'orange';
-                array[j - gap].color = 'orange';
-                await requireDraw();
-                array[i].color = '';
-                array[j - gap].color = '';
+        let n = array.length;
+        let gap = Math.ceil(n / 3);
 
-                if (ary[j - gap].value <= temp.value)
-                    break;
+        while (gap > 0) {
+            for (let i = gap; i < n; i++) {
+                if (!isRunning())
+                    throw new AbortSortingError();
 
-                ary[j] = ary[j - gap];
-                j -= gap;
+                const maxIndex = i;
+                let ary = [...array];
+
+                // Compare and shift elements
+                let j = i;
+                while (j >= gap && await compare(array[j - gap], array[maxIndex]) > 0) {
+                    if (!isRunning())
+                        throw new AbortSortingError();
+
+                    ary[j] = ary[j - gap];
+                    j -= gap;
+                }
+                ary[j] = array[maxIndex];
+
+                await copyWith(array, 0, ary, 0, ary.length - 1);
             }
 
-            ary[j] = temp;
-
-            for (let k = 0; k < n; k++) {
-                array[k] = ary[k];
-            }
+            if (gap === 1)
+                break;
+            gap = Math.ceil(gap / 3);
         }
 
-        if (gap === 1)
-            break;
-        gap = Math.ceil(gap / 3);
+        return array
     }
-
-    // Highlight sorted elements
-    for (let i = 0; i < array.length; i++) {
-        array[i].color = 'green';
-    }
-    await requireDraw();
 }

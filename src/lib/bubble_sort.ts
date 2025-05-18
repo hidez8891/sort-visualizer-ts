@@ -1,27 +1,28 @@
-import type { ArrayItem } from './types';
+import {
+    type ArrayItem,
+    type RunningOption,
+    type SortingAlgorithm,
+    AbortSortingError
+} from './types';
 
-// Bubble sort algorithm
-export async function bubbleSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-    let n = array.length;
+export class BubbleSort implements SortingAlgorithm {
+    name = 'Bubble Sort';
 
-    for (let i = 0; i < n - 1; i++) {
-        for (let j = 0; j < n - i - 1; j++) {
-            // Highlight current elements
-            array[j].color = 'orange';
-            array[j + 1].color = 'orange';
-            await requireDraw();
-            array[j].color = '';
-            array[j + 1].color = '';
+    async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+        const { isRunning, compare, swap } = opt;
+        const n = array.length;
 
-            // Compare & Swap elements
-            if (array[j].value > array[j + 1].value) {
-                [array[j], array[j + 1]] = [array[j + 1], array[j]];
+        for (let i = 0; i < n - 1; i++) {
+            for (let j = 0; j < n - i - 1; j++) {
+                if (!isRunning())
+                    throw new AbortSortingError();
+
+                if (await compare(array[j], array[j + 1]) > 0) {
+                    await swap(array, j, j + 1);
+                }
             }
         }
-    }
 
-    for (let i = 0; i < array.length; i++) {
-        array[i].color = 'green'; // Highlight sorted elements
+        return array;
     }
-    await requireDraw();
 }

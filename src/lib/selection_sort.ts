@@ -1,34 +1,38 @@
-import type { ArrayItem } from './types';
+import {
+    type ArrayItem,
+    type RunningOption,
+    type SortingAlgorithm,
+    AbortSortingError
+} from './types';
 
-export async function selectionSort(array: ArrayItem[], requireDraw: () => Promise<void>) {
-  const n = array.length;
+export class SelectionSort implements SortingAlgorithm {
+    name = 'Selection Sort';
 
-  for (let i = 0; i < n - 1; i++) {
-    // Find the minimum element in remaining unsorted array
-    let minIndex = i;
-    for (let j = i + 1; j < n; j++) {
-      // Highlight current elements
-      array[j].color = 'orange';
-      array[minIndex].color = 'orange';
-      await requireDraw();
-      array[j].color = '';
-      array[minIndex].color = '';
+    async sort(array: ArrayItem[], opt: RunningOption): Promise<ArrayItem[]> {
+        const { isRunning, compare, swap } = opt;
+        const n = array.length;
 
-      if (array[j].value < array[minIndex].value) {
-        minIndex = j;
-      }
+        for (let i = 0; i < n - 1; i++) {
+            if (!isRunning())
+                throw new AbortSortingError();
+
+            // Find the minimum element in remaining unsorted array
+            let minIndex = i;
+            for (let j = i + 1; j < n; j++) {
+                if (!isRunning())
+                    throw new AbortSortingError();
+
+                if (await compare(array[j], array[minIndex]) < 0) {
+                    minIndex = j;
+                }
+            }
+
+            // Swap the found minimum element with the first element
+            if (minIndex !== i) {
+                await swap(array, i, minIndex);
+            }
+        }
+
+        return array
     }
-
-    // Swap the found minimum element with the first element
-    if (minIndex !== i) {
-      // Perform swap
-      [array[i], array[minIndex]] = [array[minIndex], array[i]];
-    }
-  }
-
-  // Highlight all sorted elements
-  for (let i = 0; i < n; i++) {
-    array[i].color = 'green';
-  }
-  await requireDraw();
 }
